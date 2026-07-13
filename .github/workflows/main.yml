@@ -1,0 +1,62 @@
+# GitHub Action for generating a contribution graph snake
+
+name: Generate Snake
+
+on:
+  # Run every 6 hours
+  schedule:
+    - cron: "0 */6 * * *"
+
+  # Allow manual execution
+  workflow_dispatch:
+
+  # Run when pushing to main
+  push:
+    branches:
+      - main
+
+
+# Give permission to write output branch
+permissions:
+  contents: write
+
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      # Checkout repository
+      - name: Checkout
+        uses: actions/checkout@v4
+
+
+      # Generate snake animation
+      - name: Generate Snake
+        uses: Platane/snk@v3
+
+        with:
+          github_user_name: rupa-1122
+
+          outputs: |
+            dist/github-contribution-grid-snake.svg
+            dist/github-contribution-grid-snake-dark.svg?palette=github-dark
+            dist/github-contribution-grid-snake.gif
+
+
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+
+      # Deploy to output branch
+      - name: Deploy Snake
+        uses: peaceiris/actions-gh-pages@v4
+
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
+          publish_branch: output
+          force_orphan: true
